@@ -1,0 +1,69 @@
+# Compiler files
+cache/
+
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# Sensitive files
+*.key
+*.pem
+private_key.txt
+keystore.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node.js (if used)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# PowerShell scripts
+*.ps1
+
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Gas snapshots
+.gas-snapshot
+
+# Build artifacts
+artifacts/
+build/
+
+# Deployment files (if sensitive)
+deployments/
+
