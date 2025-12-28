@@ -113,14 +113,78 @@ contract BaseDevTokenTest is Test {
         assertEq(token.balanceOf(user1), transferAmount);
     }
 
-    function testApproveAndTransferFrom() public {
-        uint256 approveAmount = 100 * 10**18;
-        token.approve(user1, approveAmount);
-        assertEq(token.allowance(owner, user1), approveAmount);
+    function testTotalSupplyAfterMultipleMints() public {
+        uint256 mintAmount1 = 500 * 10**18;
+        uint256 mintAmount2 = 300 * 10**18;
+        token.mint(user1, mintAmount1);
+        token.mint(user2, mintAmount2);
+        assertEq(token.totalSupply(), initialSupply + mintAmount1 + mintAmount2);
+    }
 
+    function testBalanceAfterMultipleTransfers() public {
+        uint256 transferAmount1 = 200 * 10**18;
+        uint256 transferAmount2 = 100 * 10**18;
+        token.transfer(user1, transferAmount1);
+        token.transfer(user2, transferAmount2);
+        assertEq(token.balanceOf(owner), initialSupply - transferAmount1 - transferAmount2);
+        assertEq(token.balanceOf(user1), transferAmount1);
+        assertEq(token.balanceOf(user2), transferAmount2);
+    }
+
+    function testBurnFromAfterTransfer() public {
+        uint256 transferAmount = 300 * 10**18;
+        uint256 burnAmount = 100 * 10**18;
+        token.transfer(user1, transferAmount);
+        token.burnFrom(user1, burnAmount);
+        assertEq(token.balanceOf(user1), transferAmount - burnAmount);
+        assertEq(token.totalSupply(), initialSupply - burnAmount);
+    }
+
+    function testSelfBurn() public {
+        uint256 burnAmount = 50 * 10**18;
+        token.burn(burnAmount);
+        assertEq(token.balanceOf(owner), initialSupply - burnAmount);
+        assertEq(token.totalSupply(), initialSupply - burnAmount);
+    }
+
+    function testApproveAndTransferFromMultiple() public {
+        uint256 approveAmount = 400 * 10**18;
+        uint256 transferAmount1 = 150 * 10**18;
+        uint256 transferAmount2 = 100 * 10**18;
+        token.approve(user1, approveAmount);
         vm.prank(user1);
-        require(token.transferFrom(owner, user2, approveAmount));
-        assertEq(token.balanceOf(user2), approveAmount);
-        assertEq(token.allowance(owner, user1), 0);
+        token.transferFrom(owner, user2, transferAmount1);
+        vm.prank(user1);
+        token.transferFrom(owner, user2, transferAmount2);
+        assertEq(token.balanceOf(user2), transferAmount1 + transferAmount2);
+        assertEq(token.allowance(owner, user1), approveAmount - transferAmount1 - transferAmount2);
+    }
+
+    function testDecimals() public {
+        assertEq(token.decimals(), 18);
+    }
+
+    function testNameAndSymbol() public {
+        assertEq(token.name(), "BaseDevToken");
+        assertEq(token.symbol(), "BDT");
+    }
+
+    function testOwnerTransfer() public {
+        address newOwner = address(0x3);
+        vm.prank(owner);
+        token.transferOwnership(newOwner);
+        assertEq(token.owner(), newOwner);
+    }
+
+    function testNonOwnerCannotMint() public {
+        vm.prank(user1);
+        vm.expectRevert();
+        token.mint(user2, 100 * 10**18);
+    }
+
+    function testNonOwnerCannotBurnFrom() public {
+        vm.prank(user1);
+        vm.expectRevert();
+        token.burnFrom(owner, 100 * 10**18);
     }
 }
